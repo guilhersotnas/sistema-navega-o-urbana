@@ -1,0 +1,53 @@
+services:
+  backend:
+    build: ./backend
+    container_name: sistema_backend
+    ports:
+      - "3000:3000" # necessário para permitir acesso móvel
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: user
+      DB_PASS: 1234
+      DB_NAME: navegacao
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: sistema_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: navegacao
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: sistema_frontend
+
+    stdin_open: true
+    tty: true
+
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
